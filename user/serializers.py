@@ -1,6 +1,6 @@
 from rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
-from user.models import CustomUser, Address
+from user.models import Address, CustomUser
 
 
 class CustomRegistrationSerializer(RegisterSerializer):

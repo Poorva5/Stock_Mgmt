@@ -1,9 +1,10 @@
 import datetime
 
-from django.db.models import Sum
+from django.db.models import Sum, F
 from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import Response
+from django.db import models
 
 from .models import Order, Product, Sale
 from .serializers import OrderSerializer, ProductSerializer, SaleSerializer
@@ -21,14 +22,7 @@ class DashboardView(viewsets.ModelViewSet):
         sales = Sale.objects.filter(created_at__date=today)
         total_stock = sum(product.quantity for product in products)
         total_sales = sum(sale.total_price for sale in sales)
-        cost_of_goods_sold = Sale.objects.filter(created_at__date=today).aggregate(
-            Sum("product__price")
-        )["product__price__sum"]
-        profit_and_loss = (
-            total_sales - cost_of_goods_sold
-            if total_sales and cost_of_goods_sold
-            else 0
-        )
+        profit_and_loss = sum(sale.profit_or_loss() for sale in sales)      
         new_orders = Order.objects.filter(created_at__date=today)
 
         product_serializer = ProductSerializer(products, many=True)
